@@ -71,7 +71,7 @@ def get_openai_response(messages):
                 chat, function_response = r
             except:
                 function_response = r
-        if function_response:
+        if function_response is not chat:
             click.echo(function_response)
         response_message = None
         if chat:
