@@ -39,15 +39,19 @@ try:
 except:
     functions = []
 
-
-def get_openai_response(messages):
-    # Set up the prompt for OpenAI
+def llamada(messages):
     response_message = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-0613",
         messages=messages,
         functions=functions,
         function_call="auto",
     )
+    return response_message
+
+def get_openai_response(messages):
+    # Set up the prompt for OpenAI
+    
+    response_message = llamada(messages)
     # .content
     response_message = response_message.choices[0].message
     
@@ -57,13 +61,24 @@ def get_openai_response(messages):
         function_name = response_message["function_call"]["name"]
         fuction_to_call = available_functions[function_name]
         function_args = json.loads(response_message["function_call"]["arguments"])
-        function_response = fuction_to_call(
+        r = fuction_to_call(
             location=function_args.get("location"),
             unit=function_args.get("unit"),
         )
+        chat, function_response = False, None
+        if r:
+            try:
+                chat, function_response = r
+            except:
+                function_response = r
         if function_response:
             click.echo(function_response)
-        return False, None
+        response_message = None
+        if chat:
+            messages.append({"role": "function", "content": function_response})
+            response_message = llamada(messages)
+            response_message = response_message.choices[0].message.content
+        return chat, response_message
 
     else:
         return True, response_message.content
