@@ -13,14 +13,6 @@ funtions_file = os.path.join(path, "functions.json")
 functions_py = os.path.join(path, "functions.py")
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-# available_functions = {}
-# import functions from functions.py
-# try:
-#     exec(open(functions_py).read())
-# except:
-#     click.echo("Error importing functions.py")
-#     pass
-
 historial = []
 try:
     with open(hist_file, "r") as f:
@@ -29,15 +21,12 @@ try:
         historial = historial["historial"]
 except:
     historial = []
-# click.echo(f"funciones disponibles: {list(available_functions.keys())} \n")
 
 functions = []
-# available_functions = {}
 try:
     with open(funtions_file, "r") as f:
         functions = f.read()
         functions = json.loads(functions)
-        # available_functions = functions["available_functions"]
         functions = functions["functions"]
 except:
     functions = []
@@ -55,19 +44,22 @@ def get_openai_response(messages):
     # Set up the prompt for OpenAI
     
     response_message = llamada(messages)
-    # .content
     response_message = response_message.choices[0].message
     
     if response_message.get("function_call"):
         # Step 3: call the function
         # Note: the JSON response may not always be valid; be sure to handle errors
-        function_name = response_message["function_call"]["name"]
-        fuction_to_call = available_functions[function_name]
-        function_args = json.loads(response_message["function_call"]["arguments"])
-        r = fuction_to_call(
-            location=function_args.get("location"),
-            unit=function_args.get("unit"),
-        )
+        r = None
+        try:
+            function_name = response_message["function_call"]["name"]
+            fuction_to_call = available_functions[function_name]
+            function_args = json.loads(response_message["function_call"]["arguments"])
+            r = fuction_to_call(
+                location=function_args.get("location"),
+                unit=function_args.get("unit"),
+            )
+        except Exception as e:
+            r = None
         chat, function_response = False, None
         if r:
             try:
@@ -110,7 +102,7 @@ def main(message):
         antreriores = historial
         antreriores.append({"role": "user", "content": actual})
         save, response = get_openai_response(antreriores)
-        if save:
+        if save and response:
             click.echo(response)
             response = {"role": "assistant", "content": response}
             
