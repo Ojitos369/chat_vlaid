@@ -71,11 +71,11 @@ def get_openai_response(messages):
                 chat, function_response = r
             except:
                 function_response = r
-        if function_response is not chat:
+        if function_response and not chat:
             click.echo(function_response)
         response_message = None
         if chat:
-            messages.append({"role": "function", "content": function_response})
+            messages.append({"role": "function", "content": function_response, "name": function_name})
             response_message = llamada(messages)
             response_message = response_message.choices[0].message.content
         return chat, response_message
@@ -116,8 +116,8 @@ def main(message):
         historial = []
         click.echo("Historial cleared")
 
-    if len(historial) > 500:
-        historial = historial[-500:]
+    if len(historial) > 50:
+        historial = historial[-50:]
 
     with open(hist_file, "w") as f:
         save = {"historial": historial}
