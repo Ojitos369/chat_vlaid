@@ -3,14 +3,16 @@ import openai
 import os
 import sys
 import json
-
+from ojitos369.errors import CatchErrors as CE
 from src.functions import *
 
+ce = CE()
 path = os.path.dirname(os.path.abspath(__file__))
 path = os.path.join(path, "src")
 hist_file = os.path.join(path, ".vlaid_hist.json")
 funtions_file = os.path.join(path, "functions.json")
 functions_py = os.path.join(path, "functions.py")
+logs_file = os.path.join(path, "logs.txt")
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 historial = []
@@ -59,6 +61,13 @@ def get_openai_response(messages):
                 unit=function_args.get("unit"),
             )
         except Exception as e:
+            error = ce.show_error(e)
+            # open and save logs
+            with open(logs_file, "a+") as f:
+                fecha = datetime.datetime.now()
+                # dd/mm/YY H:M:S
+                fecha = fecha.strftime("%d/%m/%Y %H:%M:%S")
+                f.write(f"{fecha}: {error}\n")
             r = None
         chat, function_response = False, None
         if r:
