@@ -105,8 +105,9 @@ def main(message):
         if save and response:
             click.echo(response)
             response = {"role": "assistant", "content": response}
-            
             historial.append(response)
+        elif not response:
+            click.echo("...")
     elif actual == "ch":
         historial = []
         click.echo("Historial cleared")
