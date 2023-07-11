@@ -4,20 +4,22 @@ import os
 import sys
 import json
 
-home = os.path.expanduser("~")
-path = os.path.join(home, "vlaid")
+from src.functions import *
+
+path = os.path.dirname(os.path.abspath(__file__))
+path = os.path.join(path, "src")
 hist_file = os.path.join(path, ".vlaid_hist.json")
 funtions_file = os.path.join(path, "functions.json")
 functions_py = os.path.join(path, "functions.py")
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-available_functions = {}
+# available_functions = {}
 # import functions from functions.py
-try:
-    exec(open(functions_py).read())
-except:
-    print("Error importing functions.py")
-    pass
+# try:
+#     exec(open(functions_py).read())
+# except:
+#     click.echo("Error importing functions.py")
+#     pass
 
 historial = []
 try:
@@ -27,6 +29,7 @@ try:
         historial = historial["historial"]
 except:
     historial = []
+# click.echo(f"funciones disponibles: {list(available_functions.keys())} \n")
 
 functions = []
 # available_functions = {}

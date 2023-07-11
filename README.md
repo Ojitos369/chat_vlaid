@@ -1,17 +1,13 @@
 * exporta la api de openai en OPENAI_API_KEY  
     `export OPENAI_API_KEY='<key>'`
+* crea los archivos functions.json, functions.py en la carpeta src/  
 * ejecutar los comandos  
     ```shell
         python3 -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
-        pyinstaller --onefile main.py 
-        cd dist 
-        cp main vlaid 
-        cp vlaid ~/vlaid 
-        cd ..
+        python3 main.py
     ```
-* crea los archivos functions.json, functions.py en la carpeta ~/vlaid  
 
 functions.py
 ```python
