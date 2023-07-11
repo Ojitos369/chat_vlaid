@@ -6,3 +6,4 @@ build
 /src/.vlaid_hist.json
 /src/functions.json
 /src/functions.py
+*__pycache__/
