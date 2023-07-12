@@ -8,3 +8,4 @@ build
 /src/functions.py
 /src/logs.txt
 *__pycache__/
+*.Identifier
