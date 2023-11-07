@@ -16,6 +16,9 @@ logs_file = os.path.join(path, "logs.txt")
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 historial = []
+limite_historial = 5
+model_to_use = "gpt-4-1106-preview"
+
 try:
     with open(hist_file, "r") as f:
         historial = f.read()
@@ -35,7 +38,7 @@ except:
 
 def llamada(messages):
     response_message = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
+        model=model_to_use,
         messages=messages,
         functions=functions,
         function_call="auto",
@@ -121,8 +124,8 @@ def main(message):
         historial = []
         click.echo("Historial cleared")
 
-    if len(historial) > 50:
-        historial = historial[-50:]
+    if len(historial) > limite_historial:
+        historial = historial[-limite_historial:]
 
     with open(hist_file, "w") as f:
         save = {"historial": historial}
