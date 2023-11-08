@@ -8,16 +8,26 @@ from src.functions import *
 
 ce = CE()
 path = os.path.dirname(os.path.abspath(__file__))
-path = os.path.join(path, "src")
-hist_file = os.path.join(path, ".vlaid_hist.json")
-funtions_file = os.path.join(path, "functions.json")
-functions_py = os.path.join(path, "functions.py")
-logs_file = os.path.join(path, "logs.txt")
+src_path = os.path.join(path, "src")
+hist_file = os.path.join(src_path, ".vlaid_hist.json")
+funtions_file = os.path.join(src_path, "functions.json")
+functions_py = os.path.join(src_path, "functions.py")
+logs_file = os.path.join(src_path, "logs.txt")
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 historial = []
-limite_historial = 5
+limite_historial = 3
 model_to_use = "gpt-4-1106-preview"
+"""
+tlc = 10
+m = 0.02
+mpc = 3
+cpm = (m * mpc) * 1.3
+cpm
+md = tlc/cpm
+md
+# >> 0.26
+"""
 
 try:
     with open(hist_file, "r") as f:
