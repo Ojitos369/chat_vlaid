@@ -19,12 +19,13 @@ client = OpenAI()
 
 historial = []
 limite_historial = 3
+model_to_use = "gpt-4o"
+context_limit = 1000
 with open(settings_file, "r") as f:
     ajustes = json.loads(f.read())
     limite_historial = ajustes["limite_mensajes"]
-
-# model_to_use = "gpt-4-1106-preview"
-model_to_use = "gpt-4o"
+    model_to_use = ajustes["model_to_use"]
+    context_limit = ajustes["context_limit"]
 
 try:
     with open(hist_file, "r") as f:
@@ -65,22 +66,14 @@ def get_openai_response(messages):
         function_call = None
     
     if function_call:
-        # Step 3: call the function
-        # Note: the JSON response may not always be valid; be sure to handle errors
         r = None
         try:
             function_name = function_call.name
             args = function_call.arguments
             fuction_to_call = available_functions[function_name]
             function_args = json.loads(args)
-            print(f"""
-                    function_name: {function_name}
-                    args: {args}
-                    fuction_to_call: {fuction_to_call}
-                    function_args: {function_args}
-                  """)
             r = fuction_to_call(**function_args)
-            print(f"r: {r}")
+            # print(f"r: {r}")
         except Exception as e:
             error = ce.show_error(e)
             # open and save logs
@@ -98,7 +91,8 @@ def get_openai_response(messages):
                 function_response = r
         if function_response and not chat:
             click.echo(function_response)
-            response_message = None
+            messages.append({"role": "function", "content": str(function_response), "name": function_name})
+            response_message = function_response
         if chat:
             messages.append({"role": "function", "content": str(function_response), "name": function_name})
             response_message = llamada(messages)
