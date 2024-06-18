@@ -1,5 +1,5 @@
 import click
-import openai
+from openai import OpenAI
 import os
 import sys
 import json
@@ -13,21 +13,18 @@ hist_file = os.path.join(src_path, ".vlaid_hist.json")
 funtions_file = os.path.join(src_path, "functions.json")
 functions_py = os.path.join(src_path, "functions.py")
 logs_file = os.path.join(src_path, "logs.txt")
-openai.api_key = os.environ["OPENAI_API_KEY"]
+settings_file = os.path.join(src_path, "settings.json")
+
+client = OpenAI()
 
 historial = []
 limite_historial = 3
-model_to_use = "gpt-4-1106-preview"
-"""
-tlc = 10
-m = 0.02
-mpc = 3
-cpm = (m * mpc) * 1.3
-cpm
-md = tlc/cpm
-md
-# >> 0.26
-"""
+with open(settings_file, "r") as f:
+    ajustes = json.loads(f.read())
+    limite_historial = ajustes["limite_mensajes"]
+
+# model_to_use = "gpt-4-1106-preview"
+model_to_use = "gpt-4o"
 
 try:
     with open(hist_file, "r") as f:
@@ -47,7 +44,7 @@ except:
     functions = []
 
 def llamada(messages):
-    response_message = openai.ChatCompletion.create(
+    response_message = client.chat.completions.create(
         model=model_to_use,
         messages=messages,
         functions=functions,
@@ -60,19 +57,30 @@ def get_openai_response(messages):
     
     response_message = llamada(messages)
     response_message = response_message.choices[0].message
+
+    function_call = None
+    try:
+        function_call = response_message.function_call
+    except:
+        function_call = None
     
-    if response_message.get("function_call"):
+    if function_call:
         # Step 3: call the function
         # Note: the JSON response may not always be valid; be sure to handle errors
         r = None
         try:
-            function_name = response_message["function_call"]["name"]
+            function_name = function_call.name
+            args = function_call.arguments
             fuction_to_call = available_functions[function_name]
-            function_args = json.loads(response_message["function_call"]["arguments"])
-            r = fuction_to_call(
-                location=function_args.get("location"),
-                unit=function_args.get("unit"),
-            )
+            function_args = json.loads(args)
+            print(f"""
+                    function_name: {function_name}
+                    args: {args}
+                    fuction_to_call: {fuction_to_call}
+                    function_args: {function_args}
+                  """)
+            r = fuction_to_call(**function_args)
+            print(f"r: {r}")
         except Exception as e:
             error = ce.show_error(e)
             # open and save logs
@@ -90,9 +98,9 @@ def get_openai_response(messages):
                 function_response = r
         if function_response and not chat:
             click.echo(function_response)
-        response_message = None
+            response_message = None
         if chat:
-            messages.append({"role": "function", "content": function_response, "name": function_name})
+            messages.append({"role": "function", "content": str(function_response), "name": function_name})
             response_message = llamada(messages)
             response_message = response_message.choices[0].message.content
         return chat, response_message
