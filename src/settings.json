@@ -1,5 +1,5 @@
 {
     "limite_mensajes": 10,
-    "model_to_use": "gpt-4o",
+    "model_to_use": "gpt-4o-mini",
     "context_limit": 1000
 }
